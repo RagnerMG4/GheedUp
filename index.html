@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام جرد جامعة أشور - بليبلات واضحة</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        :root {
+            --primary: #1a3a5f;
+            --accent: #27ae60;
+            --bg: #f4f7fb;
+            --header-bg: #f2f2f2;
+            --shadow: 0 6px 32px 0 rgba(30, 42, 80, 0.13);
+            --radius: 18px;
+            --transition: 0.18s cubic-bezier(.4,0,.2,1);
+        }
+        body {
+            font-family: 'Cairo', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            margin: 0;
+            padding: 18px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 30px 24px 24px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1.5px solid #e0e6ef;
+        }
+        .official-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border-bottom: 2.5px solid #1a3a5f;
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+            gap: 10px;
+        }
+        @media (min-width: 768px) {
+            .official-header {
+                flex-direction: row;
+                justify-content: space-between;
+                text-align: inherit;
+            }
+        }
+        .header-side {
+            font-weight: bold;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #1a3a5f;
+            letter-spacing: 0.5px;
+        }
+        .logo-img {
+            width: 90px;
+            height: auto;
+            filter: drop-shadow(0 2px 8px #1a3a5f22);
+        }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 22px;
+            background: #e9eef6;
+            padding: 6px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #1a3a5f0a;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 16px 0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            background: transparent;
+            color: #1a3a5f;
+            transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+        }
+        .tab-btn.active, .tab-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 12px #1a3a5f22;
+        }
+        .page {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: none; }
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+        @media (min-width: 768px) {
+            .form-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+        label {
+            font-weight: bold;
+            font-size: 15px;
+            color: #1a3a5f;
+            margin-right: 5px;
+        }
+        input, select, textarea {
+            padding: 13px 14px;
+            border: 1.5px solid #c2cbe0;
+            border-radius: 10px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+            background: #fafdff;
+            transition: border var(--transition), box-shadow var(--transition);
+        }
+        input:focus, select:focus, textarea:focus {
+            border: 1.5px solid var(--primary);
+            outline: none;
+            box-shadow: 0 2px 8px #1a3a5f22;
+        }
+        .save-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            width: 100%;
+            font-weight: bold;
+            font-size: 19px;
+            cursor: pointer;
+            margin-top: 24px;
+            box-shadow: 0 2px 12px #27ae6022;
+            transition: background var(--transition), box-shadow var(--transition);
+        }
+        .save-btn:hover {
+            background: #219150;
+            box-shadow: 0 4px 18px #27ae6040;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1.5px solid #1a3a5f33;
+            margin-top: 16px;
+            border-radius: 12px;
+            background: #fafdff;
+            box-shadow: 0 2px 12px #1a3a5f0a;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 1300px;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #e0e6ef;
+            padding: 13px 8px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 13px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        th {
+            background: var(--header-bg);
+            color: #1a3a5f;
+            font-size: 14px;
+        }
+        tr:hover td {
+            background: #f4f7fb;
+        }
+        .preview-img {
+            width: 160px;
+            height: 110px;
+            object-fit: contain;
+            background: #fff;
+            border: 1.5px solid #c2cbe0;
+            border-radius: 8px;
+            box-shadow: 0 1px 6px #1a3a5f11;
+        }
+        .excel-btn {
+            background: #1d6f42;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 10px;
+            width: 100%;
+            font-weight: bold;
+            font-size: 17px;
+            cursor: pointer;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 12px #1d6f4222;
+            transition: background var(--transition), box-shadow var(--transition);
+        }
+        .excel-btn:hover {
+            background: #14532d;
+            box-shadow: 0 4px 18px #1d6f4240;
+        }
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+        .btn-edit, .btn-del {
+            border: none;
+            padding: 10px 0;
+            border-radius: 7px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background var(--transition), box-shadow var(--transition);
+            box-shadow: 0 1px 6px #1a3a5f11;
+        }
+        .btn-edit {
+            background: #f39c12;
+            color: white;
+        }
+        .btn-edit:hover {
+            background: #c87f0a;
+        }
+        .btn-del {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn-del:hover {
+            background: #b93222;
+        }
+        /* خطوط Google Fonts احترافية */
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="official-header">
+        <div class="header-side">جامعة أشور<br>الكلية التقنية الصحية والطبية<br>قسم تقنيات المختبرات الطبية</div>
+        <div><img src="mon.png" id="web-logo" class="logo-img" alt="Logo"></div>
+        <div class="header-side" style="direction: ltr;">ASHUR UNIVERSITY<br>Physiology Lab<br></div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" id="btn-tab-in" onclick="switchTab('input-page')">إضافة بيانات جهاز</button>
+        <button class="tab-btn" id="btn-tab-dis" onclick="switchTab('display-page')">سجل جرد الأجهزة</button>
+        <button class="tab-btn" id="btn-tab-chem" onclick="switchTab('chem-page')">جرد المواد الكيميائية</button>
+    </div>
+
+    <div id="input-page" class="page active">
+        <input type="hidden" id="edit-idx" value="-1">
+        <div class="form-grid">
+            <div class="field-group">
+                <label>اسم الجهاز (EN)</label>
+                <input type="text" id="name_en" placeholder="مثال: Centrifuge">
+            </div>
+            <div class="field-group">
+                <label>اسم الجهاز (عربي)</label>
+                <input type="text" id="name_ar" placeholder="مثال: جهاز الطرد المركزي">
+            </div>
+            <div class="field-group">
+                <label>العدد</label>
+                <input type="number" id="count" placeholder="0">
+            </div>
+            <div class="field-group">
+                <label>Serial number</label>
+                <input type="text" id="serial" placeholder="S/N">
+            </div>
+            <div class="field-group">
+                <label>نوع الاستخدام</label>
+                <input type="text" id="usage" value="تجارب">
+            </div>
+            <div class="field-group">
+                <label>نوع الجهاز</label>
+                <select id="type"><option value="كهربائي">كهربائي</option><option value="ميكانيكي">ميكانيكي</option></select>
+            </div>
+            <div class="field-group">
+                <label>المنشأ</label>
+                <input type="text" id="origin" placeholder="مثال: Germany">
+            </div>
+            <div class="field-group">
+                <label>مستوى الخطورة</label>
+                <input type="text" id="risk" placeholder="متوسط / بدون">
+            </div>
+            <div class="field-group">
+                <label>العمر الافتراضي (سنة)</label>
+                <input type="number" id="life" placeholder="5">
+            </div>
+            <div class="field-group" style="grid-column: 1 / -1;">
+                <label>وصف الجهاز</label>
+                <textarea id="desc" rows="3" placeholder="شرح مختصر عن عمل الجهاز..."></textarea>
+            </div>
+            <div class="field-group" style="grid-column: 1 / -1;">
+                <label>صورة عن الجهاز</label>
+                <input type="file" id="img-input" accept="image/*">
+            </div>
+        </div>
+        <button class="save-btn" onclick="saveData()" id="save-btn-label">💾 حفظ الجهاز في السجل</button>
+    </div>
+
+    <div id="display-page" class="page">
+        <button onclick="exportToExcel()" class="excel-btn">📥 تصدير ملف Excel   </button>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ت</th>
+                        <th>اسم الجهاز باللغة الانكليزية</th>
+                        <th>اسم الجهاز باللغة العربية</th>
+                        <th>العدد</th>
+                        <th>Serial number</th>
+                        <th>نوع الاستخدام</th>
+                        <th>نوع الجهاز</th>
+                        <th>المنشأ</th>
+                        <th>مستوى الخطورة</th>
+                        <th>العمر الافتراضي</th>
+                        <th>وصف الجهاز</th>
+                        <th>صورة عن الجهاز</th>
+                        <th>التحكم</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <!-- صفحة جرد المواد الكيميائية -->
+    <div id="chem-page" class="page">
+        <div class="header" style="text-align:center;color:var(--primary);font-size:1.7rem;font-weight:bold;margin-bottom:18px;letter-spacing:1px;">جرد المواد الكيميائية</div>
+        <input type="hidden" id="chem-edit-idx" value="-1">
+        <div class="form-grid">
+            <div class="field-group">
+                <label>اسم المادة</label>
+                <input type="text" id="chem_name" placeholder="مثال: Ethanol">
+            </div>
+            <div class="field-group">
+                <label>العدد</label>
+                <input type="number" id="chem_count" placeholder="0">
+            </div>
+            <div class="field-group">
+                <label>الكمية</label>
+                <input type="text" id="chem_amount" placeholder="مثال: 500ml">
+            </div>
+            <div class="field-group">
+                <label>المنشأ</label>
+                <input type="text" id="chem_origin" placeholder="مثال: Germany">
+            </div>
+            <div class="field-group" style="grid-column: 1 / -1;">
+                <label>ملاحظات</label>
+                <textarea id="chem_notes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea>
+            </div>
+        </div>
+        <button class="save-btn" onclick="saveChem()" id="chem-save-btn-label">💾 حفظ المادة في السجل</button>
+        <button class="excel-btn" onclick="exportChemExcel()">📥 تصدير ملف Excel</button>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ت</th>
+                        <th>اسم المادة</th>
+                        <th>العدد</th>
+                        <th>الكمية</th>
+                        <th>المنشأ</th>
+                        <th>ملاحظات</th>
+                        <th>التحكم</th>
+                    </tr>
+                </thead>
+                <tbody id="chem-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // الأجهزة
+    let db = JSON.parse(localStorage.getItem('ashur_final_labels')) || [];
+    // المواد الكيميائية
+    let chemDB = JSON.parse(localStorage.getItem('ashur_chem_labels')) || [];
+
+    function switchTab(id) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        // تفعيل الزر المناسب
+        if(id === 'input-page') document.getElementById('btn-tab-in').classList.add('active');
+        if(id === 'display-page') {
+            document.getElementById('btn-tab-dis').classList.add('active');
+            render();
+        }
+        if(id === 'chem-page') {
+            document.getElementById('btn-tab-chem').classList.add('active');
+            renderChem();
+        }
+    }
+
+    // الأجهزة
+    async function saveData() {
+        const file = document.getElementById('img-input').files[0];
+        let base64 = document.getElementById('edit-idx').getAttribute('data-img') || "";
+        if (file) {
+            base64 = await new Promise(r => {
+                const reader = new FileReader();
+                reader.onload = e => r(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        }
+        const data = {
+            name_en: document.getElementById('name_en').value,
+            name_ar: document.getElementById('name_ar').value,
+            count: document.getElementById('count').value,
+            serial: document.getElementById('serial').value,
+            usage: document.getElementById('usage').value,
+            type: document.getElementById('type').value,
+            origin: document.getElementById('origin').value,
+            risk: document.getElementById('risk').value,
+            life: document.getElementById('life').value,
+            desc: document.getElementById('desc').value,
+            image: base64
+        };
+        const idx = parseInt(document.getElementById('edit-idx').value);
+        if(idx === -1) db.push(data); else db[idx] = data;
+        localStorage.setItem('ashur_final_labels', JSON.stringify(db));
+        resetForm();
+        switchTab('display-page');
+    }
+    function render() {
+        const body = document.getElementById('inventory-body');
+        body.innerHTML = db.map((item, i) => `
+            <tr>
+                <td>${i+1}</td>
+                <td>${item.name_en}</td>
+                <td>${item.name_ar}</td>
+                <td>${item.count}</td>
+                <td>${item.serial}</td>
+                <td>${item.usage}</td>
+                <td>${item.type}</td>
+                <td>${item.origin}</td>
+                <td>${item.risk}</td>
+                <td>${item.life}</td>
+                <td style="text-align:right;">${item.desc}</td>
+                <td><img src="${item.image}" class="preview-img"></td>
+                <td class="action-btns">
+                    <button class="btn-edit" onclick="editItem(${i})">تعديل</button>
+                    <button class="btn-del" onclick="deleteItem(${i})">حذف</button>
+                </td>
+            </tr>`).join('');
+    }
+    function editItem(i) {
+        const itm = db[i];
+        document.getElementById('name_en').value = itm.name_en;
+        document.getElementById('name_ar').value = itm.name_ar;
+        document.getElementById('count').value = itm.count;
+        document.getElementById('serial').value = itm.serial;
+        document.getElementById('usage').value = itm.usage;
+        document.getElementById('type').value = itm.type;
+        document.getElementById('origin').value = itm.origin;
+        document.getElementById('risk').value = itm.risk;
+        document.getElementById('life').value = itm.life;
+        document.getElementById('desc').value = itm.desc;
+        document.getElementById('edit-idx').value = i;
+        document.getElementById('edit-idx').setAttribute('data-img', itm.image);
+        document.getElementById('save-btn-label').innerText = "🔄 تحديث البيانات";
+        switchTab('input-page');
+    }
+    function resetForm() {
+        document.querySelectorAll('#input-page input, #input-page textarea').forEach(e => e.value = "");
+        document.getElementById('edit-idx').value = "-1";
+        document.getElementById('save-btn-label').innerText = "💾 حفظ الجهاز في السجل";
+    }
+    function deleteItem(i) {
+        if(confirm("هل تريد حذف هذا الجهاز نهائياً؟")) {
+            db.splice(i, 1);
+            localStorage.setItem('ashur_final_labels', JSON.stringify(db));
+            render();
+        }
+    }
+    async function exportToExcel() {
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('الجرد', { views: [{ rightToLeft: true }] });
+        sheet.mergeCells('A1:D3');
+        sheet.getCell('A1').value = "جامعة اشور\nالكلية التقنية الصحية والطبية\nقسم تقنيات المختبرات الطبية";
+        sheet.getCell('A1').alignment = { horizontal: 'right', vertical: 'middle', wrapText: true };
+        sheet.mergeCells('I1:L3');
+        sheet.getCell('I1').value = "ASHUR UNIVERSITY\nPhysiology Lab\n";
+        sheet.getCell('I1').alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+        sheet.getCell('I1').font = { bold: true };
+        try {} catch(e) {}
+        const hRow = sheet.getRow(5);
+        hRow.values = ["ت", "اسم الجهاز باللغة الانكليزية", "اسم الجهاز باللغة العربية", "العدد", "Serial number", "نوع الاستخدام", "نوع الجهاز", "المنشأ", "مستوى الخطورة", "العمر الافتراضي", "وصف الجهاز", "صورة عن الجهاز"];
+        hRow.eachCell(c => { 
+            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
+            c.font = { bold: true }; 
+            c.border = { top:{style:'thin'}, left:{style:'thin'}, bottom:{style:'thin'}, right:{style:'thin'} };
+            c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+        });
+        db.forEach((item, i) => {
+            const row = sheet.addRow([i+1, item.name_en, item.name_ar, item.count, item.serial, item.usage, item.type, item.origin, item.risk, item.life, item.desc, ""]);
+            row.height = 160;
+            row.eachCell(c => { c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; c.border = { top:{style:'thin'}, left:{style:'thin'}, bottom:{style:'thin'}, right:{style:'thin'} }; });
+            if (item.image) {
+                const imgId = workbook.addImage({ base64: item.image, extension: 'png' });
+                sheet.addImage(imgId, { tl: { col: 11, row: row.number - 1 }, ext: { width: 200, height: 190 } });
+            }
+        });
+        sheet.getColumn(11).width = 45; sheet.getColumn(12).width = 35;
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), "جرد_جامعة_اشور_النهائي.xlsx");
+    }
+
+    // المواد الكيميائية
+    function renderChem() {
+        const body = document.getElementById('chem-body');
+        body.innerHTML = chemDB.map((item, i) => `
+            <tr>
+                <td>${i+1}</td>
+                <td>${item.name}</td>
+                <td>${item.count}</td>
+                <td>${item.amount}</td>
+                <td>${item.origin}</td>
+                <td style="text-align:right;">${item.notes}</td>
+                <td class="action-btns">
+                    <button class="btn-edit" onclick="editChem(${i})">تعديل</button>
+                    <button class="btn-del" onclick="deleteChem(${i})">حذف</button>
+                </td>
+            </tr>`).join('');
+    }
+    function saveChem() {
+        const data = {
+            name: document.getElementById('chem_name').value,
+            count: document.getElementById('chem_count').value,
+            amount: document.getElementById('chem_amount').value,
+            origin: document.getElementById('chem_origin').value,
+            notes: document.getElementById('chem_notes').value
+        };
+        const idx = parseInt(document.getElementById('chem-edit-idx').value);
+        if(idx === -1) chemDB.push(data); else chemDB[idx] = data;
+        localStorage.setItem('ashur_chem_labels', JSON.stringify(chemDB));
+        resetChemForm();
+        renderChem();
+    }
+    function editChem(i) {
+        const itm = chemDB[i];
+        document.getElementById('chem_name').value = itm.name;
+        document.getElementById('chem_count').value = itm.count;
+        document.getElementById('chem_amount').value = itm.amount;
+        document.getElementById('chem_origin').value = itm.origin;
+        document.getElementById('chem_notes').value = itm.notes;
+        document.getElementById('chem-edit-idx').value = i;
+        document.getElementById('chem-save-btn-label').innerText = "🔄 تحديث البيانات";
+    }
+    function resetChemForm() {
+        document.querySelectorAll('#chem-page input, #chem-page textarea').forEach(e => e.value = "");
+        document.getElementById('chem-edit-idx').value = "-1";
+        document.getElementById('chem-save-btn-label').innerText = "💾 حفظ المادة في السجل";
+    }
+    function deleteChem(i) {
+        if(confirm("هل تريد حذف هذه المادة نهائياً؟")) {
+            chemDB.splice(i, 1);
+            localStorage.setItem('ashur_chem_labels', JSON.stringify(chemDB));
+            renderChem();
+        }
+    }
+    // تصدير المواد الكيميائية إلى Excel
+    async function exportChemExcel() {
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('جرد المواد الكيميائية', { views: [{ rightToLeft: true }] });
+        sheet.mergeCells('A1:F1');
+        sheet.getCell('A1').value = "سجل جرد المواد الكيميائية";
+        sheet.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+        sheet.getCell('A1').font = { bold: true, size: 16 };
+        const hRow = sheet.getRow(3);
+        hRow.values = ["ت", "اسم المادة", "العدد", "الكمية", "المنشأ", "ملاحظات"];
+        hRow.eachCell(c => {
+            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
+            c.font = { bold: true };
+            c.border = { top:{style:'thin'}, left:{style:'thin'}, bottom:{style:'thin'}, right:{style:'thin'} };
+            c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+        });
+        chemDB.forEach((item, i) => {
+            const row = sheet.addRow([i+1, item.name, item.count, item.amount, item.origin, item.notes]);
+            row.eachCell(c => {
+                c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+                c.border = { top:{style:'thin'}, left:{style:'thin'}, bottom:{style:'thin'}, right:{style:'thin'} };
+            });
+        });
+        [2,3,4,5,6].forEach(idx => sheet.getColumn(idx).width = 22);
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), "سجل_جرد_المواد_الكيميائية.xlsx");
+    }
+    // عند تحميل الصفحة، عرض الأجهزة أولاً
+    render();
+</script>
+
+</body>
+</html>
